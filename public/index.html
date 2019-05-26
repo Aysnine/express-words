@@ -1,0 +1,57 @@
+<html>
+
+<head>
+  <title>Express</title>
+</head>
+
+<body>
+  <h1>留言板 Demo</h1>
+  <div id="app">
+    <input type="text" v-model="input" @keyup.enter="submit" />
+    <ul v-if="words.length">
+      <li v-for="item in words">
+        #{{ item.id }}【{{ item.createdDate }}】 {{ item.content }}
+        <button @click="remove(item.id)">删除</button>
+      </li>
+    </ul>
+    <span v-else>还没有留言</span>
+  </div>
+
+  <script src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
+  <script src="https://cdn.bootcss.com/axios/0.18.0/axios.min.js"></script>
+  <script>
+    ; (() => {
+      const app = new Vue({
+        el: '#app',
+        data: {
+          input: '',
+          words: []
+        },
+        mounted() {
+          this.getWords()
+        },
+        methods: {
+          async getWords() {
+            const { data: { content } } = await axios.get('/words')
+            this.words = content
+          },
+          async submit() {
+            await axios.post('/words', {
+              content: this.input
+            })
+            this.input = ''
+            this.getWords()
+          },
+          async remove(id) {
+            await axios.delete('/words', {
+              params: { id }
+            })
+            this.getWords()
+          }
+        }
+      })
+    })();
+  </script>
+</body>
+
+</html>
